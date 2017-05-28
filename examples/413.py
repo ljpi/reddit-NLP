@@ -1,3 +1,9 @@
+
+# coding: utf-8
+
+# In[4]:
+
+# %load main.py
 import praw
 import datetime
 from praw.models import MoreComments
@@ -8,9 +14,9 @@ import numpy
 
 client_id = open("client_id").read()
 client_secret = open("client_secret").read()
-password = open("password").read()
+password = open("user_password").read()
 user_agent = open("user_agent").read()
-username = open("username").read()
+username = open("user_name").read()
 
 
 reddit = praw.Reddit(client_id=client_id,
@@ -52,13 +58,13 @@ def getNews(subreddit, n):
 
 startTime = datetime.datetime.now()
 
-resultsUS = getNews("news",20)
+resultsUS = getNews("news",10)
 usNews = resultsUS[0]
 usComments = resultsUS[1]
 
-# resultsWorld = getNews("worldnews",1)
-# worldNews = resultsWorld[0]
-# worldComments = resultsWorld[1]
+resultsWorld = getNews("worldnews",10)
+worldNews = resultsWorld[0]
+worldComments = resultsWorld[1]
 
 endTime = datetime.datetime.now()
 
@@ -86,26 +92,26 @@ for k in usNews:
     print(n.sentiment.polarity)
     usSent.append(n.sentiment.polarity)
 
-# for k in worldNews:
-#     print(k)
-#     title = worldNews[k][1]
-#     n = TextBlob(title)
-#     print(n)
-#     print(n.sentiment.polarity)
-#     worldSent.append(n.sentiment.polarity)
+for k in worldNews:
+    print(k)
+    title = worldNews[k][1]
+    n = TextBlob(title)
+    print(n)
+    print(n.sentiment.polarity)
+    worldSent.append(n.sentiment.polarity)
 
 usSentAvg = sum(usSent) / float(len(usSent))
-# worldSentAvg = sum(worldSent) / float(len(worldSent))
+worldSentAvg = sum(worldSent) / float(len(worldSent))
 
 print("US")
 print(usSentAvg)
 print(min(usSent))
 print(max(usSent))
 
-# print("World")
-# print(worldSentAvg)
-# print(min(worldSent))
-# print(max(worldSent))
+print("World")
+print(worldSentAvg)
+print(min(worldSent))
+print(max(worldSent))
 
 #also get standard deviation
 #and more general descriptive stats
@@ -114,50 +120,65 @@ print(max(usSent))
 #Step 2: LSA
 
 #Step 3: By Time Analysis
-print(usNews)
-
-#first do with us, then do with world
-before_trump = list()
-after_trump = list()
-#nov 8 2016
-winning_date = datetime.datetime.strptime('20161108', "%Y%m%d")
-#cutoff at may 20
-todays_date = datetime.datetime.strptime('20170520', "%Y%m%d")
-#194 days difference between winning date and may20 = 20160428
-start_date = datetime.datetime.strptime('20160428', "%Y%m%d")
-
-print(winning_date)
-print(todays_date)
-print(start_date)
-
-for news_key in usNews:
-    timeStamp = (usNews[news_key][2])
-    if timeStamp >= winning_date and timeStamp <= todays_date:
-        #append to after trump
-        after_trump.append(usNews[news_key])
-    elif timeStamp >= start_date and timeStamp < winning_date:
-        #append to before trump
-        before_trump.append(usNews[news_key])
-    #else do nothing, out of sample range
-
-print(after_trump)
-print(len(after_trump))
-print(before_trump)
-print(len(before_trump))
-
-#just the titles
-after_trump_titles_only=list()
-for l in after_trump:
-    after_trump_titles_only.append(l[1])
-before_trump_titles_only=list()
-for l in before_trump:
-    before_trump_titles_only.append(l[1])
-
-print(after_trump_titles_only)
-print(before_trump_titles_only)
 
 #Step 4: Visualization - Word Clouds and others
 #benchmark vs random word sample
 
 #Step 5 (Bonus): Comment stuff AND/OR title classifications unsupervised
+
+
+
+# In[35]:
+
+#LSA part
+usNews_titles = []
+for k in usNews:
+    usNews_titles.append(usNews[k][1])
+
+
+# In[ ]:
+
+import nltk
+nltk.download('all')
+
+
+# In[61]:
+
+def LSA(title_list):
+    words = []
+    for i in title_list:
+        words += i.split()
+    filtered_words = [word for word in words if word not in stopwords.words('english')]
+    terms = {}
+    for j in words:
+            if j not in terms:
+                terms[j] = 1
+            else:
+                terms[j] += 1
+    return terms
+
+
+# In[62]:
+
+LSA(usNews_titles)
+
+
+# In[59]:
+
+
+
+
+# In[56]:
+
+
+
+
+# In[57]:
+
+
+
+
+# In[58]:
+
+
 

@@ -1,5 +1,6 @@
 import praw
 import datetime
+
 from praw.models import MoreComments
 from textblob import TextBlob
 import sys
@@ -52,13 +53,13 @@ def getNews(subreddit, n):
 
 startTime = datetime.datetime.now()
 
-resultsUS = getNews("news",20)
+resultsUS = getNews("news",10)
 usNews = resultsUS[0]
 usComments = resultsUS[1]
 
-# resultsWorld = getNews("worldnews",1)
-# worldNews = resultsWorld[0]
-# worldComments = resultsWorld[1]
+resultsWorld = getNews("worldnews",10)
+worldNews = resultsWorld[0]
+worldComments = resultsWorld[1]
 
 endTime = datetime.datetime.now()
 
@@ -68,9 +69,6 @@ print(endTime)
 #100 records ~800 seconds
 print((endTime-startTime).seconds)
 
-print(resultsUS)
-print(usNews)
-print(usComments)
 
 
 #Step 1: Sentiment Analysis & Descriptive Stats
@@ -86,32 +84,60 @@ for k in usNews:
     print(n.sentiment.polarity)
     usSent.append(n.sentiment.polarity)
 
-# for k in worldNews:
-#     print(k)
-#     title = worldNews[k][1]
-#     n = TextBlob(title)
-#     print(n)
-#     print(n.sentiment.polarity)
-#     worldSent.append(n.sentiment.polarity)
+for k in worldNews:
+    print(k)
+    title = worldNews[k][1]
+    n = TextBlob(title)
+    print(n)
+    print(n.sentiment.polarity)
+    worldSent.append(n.sentiment.polarity)
 
 usSentAvg = sum(usSent) / float(len(usSent))
-# worldSentAvg = sum(worldSent) / float(len(worldSent))
+worldSentAvg = sum(worldSent) / float(len(worldSent))
 
+UsSubScore = list()
+for i in usNews:
+    n=(usNews[i][3])
+    UsSubScore.append(n)
+
+WorldSubScore = list()
+for i in worldNews:
+    n=(worldNews[i][3])
+    WorldSubScore.append(n)
+    
 print("US")
 print(usSentAvg)
 print(min(usSent))
 print(max(usSent))
 
-# print("World")
-# print(worldSentAvg)
-# print(min(worldSent))
-# print(max(worldSent))
+import pandas as pd
+UsNews = pd.DataFrame(
+    {'World News': worldSent,
+     'US News': usSent,
+     'World Post Score': WorldSubScore,
+     'US Post Score': UsSubScore
+    })
 
-#also get standard deviation
-#and more general descriptive stats
-#visualize
+
+
+# Descriptive Statistics
+News.describe()
 
 #Step 2: LSA
+
+def LSA(title_list):
+    words = []
+    for i in title_list:
+        words += i.split()
+    filtered_words = [word for word in words if word not in stopwords.words('english')]
+    terms = {}
+    for j in words:
+            if j not in terms:
+                terms[j] = 1
+            else:
+                terms[j] += 1
+    return terms
+
 
 #Step 3: By Time Analysis
 print(usNews)
@@ -155,6 +181,63 @@ for l in before_trump:
 
 print(after_trump_titles_only)
 print(before_trump_titles_only)
+
+# By Time Analysis For World
+before_trump_world=list()
+after_trump_worldl=list()
+
+# before and after, sentiment analysis. 
+
+# BT = before trump
+# AT = after trump
+
+ATusSent = list()
+
+for k in after_trump_titles_only:
+    title=k
+    n = TextBlob(title)
+    print(n)
+    print(n.sentiment.polarity)
+    ATusSent.append(n.sentiment.polarity)
+
+score=list()
+for k in after_trump:
+    n=k[3]
+    score.append(n)
+
+AT=pd.DataFrame({
+    "After Trump News Sentiment" : ATusSent,
+    "After Trump Score": score
+})
+
+# After Trump Descriptive Statistics on Sentiment
+AT.describe()
+
+
+
+BTusSent= list()
+
+for k in before_trump_titles_only:
+    title=k
+    n = TextBlob(title)
+    print(n)
+    print(n.sentiment.polarity)
+    BTusSent.append(n.sentiment.polarity)
+
+score=list()
+for k in before_trump_titles_only:
+    n=k[3]
+    score.append(n)
+
+BT=pd.DataFrame({
+    "Before Trump News Sentiment" : BTusSent,
+    "Before Trump Score": score
+})
+
+BT.describe()
+
+LSA(before_trump_titles_only)
+
 
 #Step 4: Visualization - Word Clouds and others
 #benchmark vs random word sample
