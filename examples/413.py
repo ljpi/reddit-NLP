@@ -8,15 +8,17 @@ import praw
 import datetime
 from praw.models import MoreComments
 from textblob import TextBlob
+import nltk
 import sys
 import numpy
 
 
-client_id = open("client_id").read()
-client_secret = open("client_secret").read()
-password = open("user_password").read()
-user_agent = open("user_agent").read()
-username = open("user_name").read()
+
+client_id = open("../client_id").read()
+client_secret = open("../client_secret").read()
+password = open("../password").read()
+user_agent = open("../user_agent").read()
+username = open("../username").read()
 
 
 reddit = praw.Reddit(client_id=client_id,
@@ -148,9 +150,9 @@ def LSA(title_list):
     words = []
     for i in title_list:
         words += i.split()
-    filtered_words = [word for word in words if word not in stopwords.words('english')]
+    filtered_words = [word for word in words if word not in nltk.corpus.stopwords.words('english')]
     terms = {}
-    for j in words:
+    for j in filtered_words:
             if j not in terms:
                 terms[j] = 1
             else:
